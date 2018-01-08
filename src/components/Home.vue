@@ -8,13 +8,24 @@
         <v-btn large class="primary" router to="/meetups/new"> Organise meetups </v-btn>
       </v-flex>  <!-- xs12 et sm6 pour gérer l'affichage suivant la taille de l'écran -->
     </v-layout>
-    <v-layout row wrap class="mt-2">
+    <v-layout>
+      <v-flex xs12 class="text-xs-center">            <!-- text-xs-center pour que le loader soit centré-->
+        <v-progress-circular
+        indeterminate
+        color="primary"
+        :width="7"
+        :size="70"
+        v-if="loading"></v-progress-circular>         <!-- loader qui tourne dans carousel (v-if... si loading is true, il affiche le spinner)-->
+      </v-flex>
+    </v-layout>
+    <v-layout row wrap class="mt-2" v-if="!loading">    <!-- v-if... pwermet de ne pas afficher le carousel tant que pas chargé -->
       <v-flex xs12>
-        <v-carousel>
+        <v-carousel style=" cursor: pointer;">
           <v-carousel-item
            v-for="meetup in meetups"
            v-bind:src="meetup.imageUrl"
-           :key="meetup.id">
+           :key="meetup.id"
+           @click="onLoadMeetup(meetup.id)"> <!-- permet de cliquer sur image pour emmener à la page, voir methods: plus loin -->
            <div class="title">
              {{ meetup.title }}
            </div>
@@ -22,7 +33,7 @@
          </v-carousel>
       </v-flex>
     </v-layout>
-    <v-layout row wrap class="mb-3 ">
+    <v-layout row wrap class="mb-3 " v-if="!loading">
       <v-flex xs12 class="text-xs-center mt-2">
         <p>
           Join our meetups
@@ -34,12 +45,17 @@
 
 <script>
   export default {
-    data () {
-      return {
-        meetups: [
-          { imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/4/47/New_york_times_square-terabass.jpg', id: 'adsfg', title: 'Meetup in New York' },
-          { imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/9/97/Pont_des_Arts%2C_Paris.jpg', id: 'adsfgadf', title: 'Meetup in Paris' }
-        ]
+    computed: {
+      meetups () {
+        return this.$store.getters.featuredMeetups
+      },
+      loading () {
+        return this.$store.getters.loading
+      }
+    },
+    methods: {
+      onLoadMeetup (id) {
+        this.$router.push('/meetups/' + id)
       }
     }
   }
