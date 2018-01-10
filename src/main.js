@@ -27,7 +27,7 @@ new Vue({
       authDomain: 'projet-chat-748fd.firebaseapp.com',
       databaseURL: 'https://projet-chat-748fd.firebaseio.com',
       projectId: 'projet-chat-748fd',
-      storageBucket: 'projet-chat-748fd.appspot.com'
+      storageBucket: 'gs://projet-chat-748fd.appspot.com'
     })
     firebase.auth().onAuthStateChanged((user) => {
       if (user) {

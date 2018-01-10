@@ -32,13 +32,13 @@
           </v-layout>
           <v-layout row>
             <v-flex xs12 sm6 offset-sm3>
-              <v-text-field
-                name="imageUrl"
-                label="Image URL"
-                id="image-Url"
-                v-model="imageUrl"
-                required>
-              </v-text-field>
+              <v-btn raised class="primary" @click="onPickFile">Upload Image</v-btn>
+              <input
+              type="file"
+              style="display: none"
+              ref="fileInput"
+              accept="image/*"
+              @change="onFilePicked">                <!-- display: none permet de cacher le bouton moche de l'input mais il reste utilisable-->
             </v-flex>
           </v-layout>
           <v-layout row>
@@ -96,7 +96,8 @@
         imageUrl: '',
         description: '',
         date: new Date(),
-        time: new Date()
+        time: new Date(),
+        image: null
       }
     },
     computed: {
@@ -125,15 +126,34 @@
         if (!this.formIsValid) {
           return
         }
+        if (!this.image) {
+          return
+        }
         const meetupData = {
           title: this.title,
           location: this.location,
-          imageUrl: this.imageUrl,
+          image: this.image,
           description: this.description,
           date: this.submittableDateTime
         }
         this.$store.dispatch('createMeetup', meetupData)
         this.$router.push('/meetups')
+      },
+      onPickFile () {
+        this.$refs.fileInput.click()                                // $refs fait référence à tous les ref dans ce fichier
+      },
+      onFilePicked (event) {
+        const files = event.target.files
+        let filename = files[0].name                            // [0] car un seul élément
+        if (filename.lastIndexOf('.') <= 0) {                       // ('.') <= 0 indique qu'il n'y a pas de point dans le nom du fichier
+          return alert('Please add a valid file!')
+        }
+        const fileReader = new FileReader()                         // transforme l'image (binaire?) en un string
+        fileReader.addEventListener('load', () => {
+          this.imageUrl = fileReader.result                         // result = en gros à l'image sous forme de texte, enregistré dns imageUrl
+        })
+        fileReader.readAsDataURL(files[0])
+        this.image = files[0]                                         // store the file in image without any changes
       }
     }
   }

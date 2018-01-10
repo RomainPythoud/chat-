@@ -74,16 +74,30 @@ export const store = new Vuex.Store({
       const meetup = {
         title: payload.title,
         location: payload.location,
-        imageUrl: payload.imageUrl,
         description: payload.description,
         date: payload.date.toISOString(),       // car firebase ne peut pas enregistrer de date si pas sous forme de string
         creatorId: getters.user.id
       }
+      let imageUrl                            // crée une variable imageUrl ret key
+      let key
       firebase.database().ref('meetups').push(meetup)         // utiliser set à la place de push si un seul objet et pas une liste, meetups = nom fichier dans database
         .then((data) => {
-          const key = data.key
+          key = data.key                              // retourne l'ID
+          return key
+        })
+        .then(key => {
+          const filename = payload.image.name
+          const ext = filename.slice(filename.lastIndexOf('.'))
+          return firebase.storage().ref('meetups/' + key + '.' + ext).put(payload.image)     // enregistre dans dossier meetups, le nom: key.ext
+        })
+        .then(fileData => {
+          imageUrl = fileData.metadata.downloadURLs[0]
+          return firebase.database().ref('meetups').push(meetup).child(key).update({imageUrl: imageUrl})
+        })
+        .then(() => {
           commit('createMeetup', {
             ...meetup,
+            imageUrl: imageUrl,
             id: key                                       // ...meetup reprend toutes les données de la const meetup (title, location,...)
           })
         })
